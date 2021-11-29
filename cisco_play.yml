@@ -1,0 +1,47 @@
+---
+- hosts: switches
+  gather_facts: no
+  #   Ansible docs recommend connection: network_cli
+  #   https://docs.ansible.com/ansible/latest/collections/cisco/ios/ios_command_module.html
+  connection: network_cli
+
+  pre_tasks:
+  - name: Get current Ansible version on local host
+    local_action: command ansible --version
+    register: local_ansible_version
+  - name: Require a specific ansible version...
+    assert:
+      that:
+      - "'2.9.2' in local_ansible_version.stdout"
+      msg: "This playbook requires ansible==2.9.2"
+
+  tasks:
+  ### action plugins run automatically...
+
+  - name: demo the ios_command module
+    register: ios_cmds
+    retries: 3
+    ios_command:
+      commands:
+        - show ntp association
+        - show version
+        - show ip interface brief
+        - show inventory
+        - show running
+
+  - name: Example save ios_cmds to a file...
+    copy: content="{{ ios_cmds | to_nice_json }}" dest="./{{ inventory_hostname }}.json"
+
+  - name: Example use a custom Ansible filter... see ./filter_plugin directory...
+    copy: content="{{ ios_cmds | my_filter }}" dest="./{{ inventory_hostname }}_filter.json"
+
+  - name: print ios_cmds output to the screen
+    debug: var=ios_cmds.stdout_lines
+
+  #########################################################
+  # Notice how vars_module.py receives its parameters...
+  #  - path=/etc/default
+  #  - backup_dir=/var/backups
+  ########################################################
+  - name: demo the module in library/vars_module.py
+    vars_module: path=/etc/default backup_dir=/var/backups
