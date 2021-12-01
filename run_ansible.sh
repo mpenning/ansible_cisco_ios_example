@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Install juniper ansible infra
+ansible-galaxy install juniper.junos
+ansible-galaxy collection install ansible.netcommon
+
 # read the username with default value...
 # see -> https://stackoverflow.com/a/31938017/667301
 DEFAULT=$USER
