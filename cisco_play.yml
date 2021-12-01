@@ -20,7 +20,7 @@
 
   - name: demo the ios_command module
     register: ios_cmds
-    retries: 3
+    retries: 0
     ios_command:
       commands:
         - show ntp association
